@@ -1,0 +1,2 @@
+"0","genera_in_tree <- species_in_tree %>% word(1, 1, sep ='_') %>% unique()"
+"0","dato <- dato %>% filter(bind_g %in% genera_in_tree)"

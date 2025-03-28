@@ -1,0 +1,44 @@
+"0","library(tidyverse)"
+"0","library(ape)"
+"2","
+Attaching package: ‘ape’
+
+"
+"2","The following object is masked from ‘package:phylobase’:
+
+    edges
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    where
+
+"
+"0","library(ggtree)"
+"2","ggtree v3.14.0 Learn more at https://yulab-smu.top/contribution-tree-data/
+
+Please cite:
+
+Guangchuang Yu, David Smith, Huachen Zhu, Yi Guan, Tommy Tsan-Yuk Lam. ggtree: an R package for
+visualization and annotation of phylogenetic trees with their covariates and other associated
+data. Methods in Ecology and Evolution. 2017, 8(1):28-36. doi:10.1111/2041-210X.12628
+"
+"2","
+Attaching package: ‘ggtree’
+
+"
+"2","The following object is masked from ‘package:ape’:
+
+    rotate
+
+"
+"2","The following object is masked from ‘package:phylobase’:
+
+    MRCA
+
+"
+"2","The following object is masked from ‘package:tidyr’:
+
+    expand
+
+"
