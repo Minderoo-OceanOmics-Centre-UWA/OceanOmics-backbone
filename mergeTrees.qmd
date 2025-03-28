@@ -124,6 +124,52 @@ ape::write.tree(phy = big_tree_no_duplicates_merged, 'big_tree.Actinopterygii.Ch
 
 ```
 
+## Adding species for which the genera are not in the tree
+
+We have a few species where those genera are not in the tree. What we'll do instead
+is chuck the species at the root of the family.
+
+So what we have to do:
+- get the species that are not in the big tree now, get their genera
+- for each genus, get the family
+- calculate the MRCA for all family members in the tree
+- insert the genus/species at the root of the MRCA
+
+
+so like this, calculating MRCA of species A and B and inserting there:
+
+```
+
+    --- A
+    |
+----|
+    |
+    --- B
+
+```
+
+becomes
+
+```
+     --- A
+     |
+|----|
+|    |
+|    --- B
+|
+|------- Added species
+
+```
+
+again, with a random branch length.
+
+
+```{r}
+getMRCA(tree, c('t2', 't1'))
+tree <- bind.tip(tree, tip.label="potato",
+where=21, position=1)
+
+```
 
 # Adding Aves
 
