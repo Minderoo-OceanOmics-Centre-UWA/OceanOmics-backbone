@@ -1,3 +1,0 @@
-"0","sharks <- ape::read.nexus('sharktree.nex')"
-"0","bonys <- ape::read.tree('betancur_r.tre')"
-"0","bonys2 <- fishtree::fishtree_phylogeny()"

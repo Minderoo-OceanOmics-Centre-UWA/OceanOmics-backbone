@@ -1,1 +1,0 @@
-"0","big_tree_no_duplicates <- drop.tip(big_tree, tip = duplicate_tips, trim.internal = TRUE)"
