@@ -23,6 +23,7 @@ so their placement is a bit random within the genus, and obviously their branch 
 
 *Master Species List - Marine Vertebrates.xlsx* - an OceanOmics-internal curated list of marine vertebrate species. We place all of these in the phylogeny.
 
+
 *big_tree.Actinopterygii.Chondrichtyes.tre* - all trees (see below) merged into a supertree using superTree MRP. Of the three trees in this repository, this is the most 'trustworthy' one. This tree has 10,938 tips.
 
 *big_tree.withGeneraAdded.tre* - the above tree with as many marine vertebrates added as possible using [RRphylo tree.merger](https://cran.r-project.org/web/packages/RRphylo/vignettes/Tree-Manipulation.html).
@@ -31,8 +32,11 @@ Where Genus was not present in the tree, the species was not added. This tree ha
 *big_tree.withGeneraAdded.andFamilies.tre* - the above tree, but with missing species without genera in the tree added at family-level MRCA for species that were not in the tree.
 Of the three trees, this is the least 'trustworthy' one. This tree has 34,916 tips.
 
-You can see that some of these species were added at the root of the entire tree:
-![Tree with added species](tree_with_families_added.png)
+*big_tree.withGeneraAdded.andFamilies.hierarchical.tre* - all trees (see below) merged using a hierarchical MRCA approach. 
+If the species has congenerics in the same genus, place at MRCA of the genus. If the speces has no species in the same genus, 
+but others in the same family, place at MRCA of the family. If there's only one species in the genus OR one other species in the family, 
+place next to that species. This tree looks more accurate than *big_tree.withGeneraAdded.andFamilies.tre*, which has many species at strange roots.
+
 
 *.Renviron* - this changes the download SSL package to use openSSL to work with our internal VPN.
 

@@ -9,12 +9,12 @@ library(tidyverse)
 library(ape)
 library(ggtree)
 library(phytools)
+library(phangorn)
 ```
 
+# Master list
 
-# MAster list
-
-We have a master list of all marine vertebrates. 
+We have a master list of all marine vertebrates.
 
 ```{r}
 a <- readxl::read_xlsx('./Master Species List - Marine Vertebrates.xlsx', guess_max = 10000)
@@ -27,26 +27,30 @@ marine_species <- gsub(pattern = ' ', replacement = '_', marine_species)
 Download the trees:
 
 ```{r}
+if(!file.exists('betancur_r.tre')) {
 download.file('https://static-content.springer.com/esm/art%3A10.1186%2Fs12862-017-0958-3/MediaObjects/12862_2017_958_MOESM2_ESM.tre', 'betancur_r.tre')
+}
 ```
 
 ```{r}
+if(!file.exists('sharktree.nex')){
 download.file('https://data.vertlife.org/sharktree/610.tree.10Cal.RAxML.BS.nex', 'sharktree.nex')
+}
 ```
 
 ```{r}
 sharks <- ape::read.nexus('sharktree.nex')
-write.tree(sharks, 'sharktree.tre')
+#write.tree(sharks, 'sharktree.tre')
 
 bonys <- ape::read.tree('betancur_r.tre')
 bonys2 <- fishtree::fishtree_phylogeny()
 ```
 
-Have to rename teh bony fish labels, they have family and G IDs in there.
+Have to rename the bony fish labels, they have family and G IDs in there.
 
 ```{r}
 bonys$tip.label <- word(bonys$tip.label, start = 2, end = 3, sep = '_')
-write.tree(bonys, 'betancur_r_short_labels.tre')
+#write.tree(bonys, 'betancur_r_short_labels.tre')
 ```
 
 Do we have an intersection of labels? Otherwise we cannot merge
@@ -55,18 +59,19 @@ Do we have an intersection of labels? Otherwise we cannot merge
 intersect(bonys$tip.label, sharks$tip.label)
 ```
 
-I initially used bind.tree which is blazing fast but just yeets trees onto each other, there's no conflict resoultion. We can't do that.
+I initially used bind.tree which is blazing fast but just yeets trees onto each other, there's no conflict resolution. We can't do that.
 
 ```{r}
 #big_tree <- ape::bind.tree(bonys, sharks)
 #big_tree <- ape::bind.tree(big_tree, bonys2)
-
 ```
 
 # Adding Aves
 
 ```{r}
-download.file('https://erda.ku.dk/archives/341f72708302f1d0c461ad616e783b86/B10K/data_upload/03_species_trees/63K.tre', 'aves.tre')
+if(!file.exists('aves.tre')){
+  download.file('https://erda.ku.dk/archives/341f72708302f1d0c461ad616e783b86/B10K/data_upload/03_species_trees/63K.tre', 'aves.tre')
+}
 ```
 
 ```{r}
@@ -77,7 +82,7 @@ aves <- read.tree('aves.tre')
 
 ```{r}
 mammals <- read.tree('./RAxML_bipartitions.result_FIN4_raw_rooted_wBoots_4098mam1out_OK.newick')
-mammals$tip.label <- word(mammals$tip.label, start = 1, end = 2 , sep='_')
+mammals$tip.label <- word(mammals$tip.label, start = 1, end = 2, sep='_')
 mammals
 ```
 
@@ -86,19 +91,23 @@ mammals
 sssssss i'm a snake
 
 ```{r}
-download.file('https://static-content.springer.com/esm/art%3A10.1186%2F1471-2148-13-93/MediaObjects/12862_2013_2346_MOESM1_ESM.txt', 'reptiles.tre')
+if(!file.exists('reptiles.tre')) {
+  download.file('https://static-content.springer.com/esm/art%3A10.1186%2F1471-2148-13-93/MediaObjects/12862_2013_2346_MOESM1_ESM.txt', 'reptiles.tre')
+}
 ```
 
 ```{r}
 reptiles <- read.tree('reptiles.tre')
 ```
 
-# other vertebrate tree
+# Other vertebrate tree
 
-there's als othis vertebrate tree: https://datadryad.org/dataset/doi:10.5061/dryad.3c6d2
+there's also this vertebrate tree: https://datadryad.org/dataset/doi:10.5061/dryad.3c6d2
 
 ```{r}
+if(!file.exists('vert.tre')){
 download.file('https://dryad-assetstore-merritt-west.s3.us-west-2.amazonaws.com/ark%3A/13030/m5867gh3%7C1%7Cproducer/vertTree.tre?response-content-disposition=attachment%3B%20filename%3DvertTree.tre&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA2KERHV5E3OITXZXC%2F20250331%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250331T014242Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=44adc9498fd71c1c2e165d91a3a9f326092f2a1e5df0096a9c15cb781b3d7c07', 'vert.tre')
+}
 ```
 
 ```{r}
@@ -107,8 +116,7 @@ merged <- read.tree('vert.tre')
 
 The shark tree and the actinopterygii tree have overlapping species so they can be connected, while the Aves and Reptilia tree does not. So I'm using this vertebrate tree as a 'connector'. We'll use this as a 'backbone' so that the Aves tree for example has something to hang onto.
 
-
-# merging all trees
+# Merging all trees
 
 This takes *DAYS*
 
@@ -123,10 +131,14 @@ if(!file.exists('big_tree.Actinopterygii.Chondrichtyes.Mammalia.Aves.Reptilia.tr
 ```
 
 ```{r}
+if(!file.exists('big_tree.Actinopterygii.Chondrichtyes.Mammalia.Aves.Reptilia.tre')){
 ape::write.tree(phy = big_tree, 'big_tree.Actinopterygii.Chondrichtyes.Mammalia.Aves.Reptilia.tre')
-  
+}
 ```
 
+```{r}
+big_tree <- read.tree('big_tree.Actinopterygii.Chondrichtyes.Mammalia.Aves.Reptilia.tre')
+```
 
 ```{r}
 intersect(big_tree$tip.label, bonys$tip.label) %>% length()
@@ -141,7 +153,6 @@ Now we add the marine species not in any of those trees.
 
 First, we merge species into their relative genera:
 
-
 ```{r}
 species_in_tree <- big_tree$tip.label %>% unique()
 
@@ -152,32 +163,29 @@ print(paste0('missing verts: ', length(missing_verts), ' marine verts: ', length
 
 # now pull out one species per genus from our tree, those we will bind to
 species_in_tree_tibble <- tibble(reference = species_in_tree) %>% 
-  mutate(genus = word(reference, start =1 ,end = 1, sep = '_')) %>% 
+  mutate(genus = word(reference, start = 1, end = 1, sep = '_')) %>% 
   group_by(genus) %>% 
   slice_head(n=1) %>% ungroup()
 
 dato <- tibble(bind = missing_verts) %>% 
-  mutate(bind_g = word(bind, start =1 , end = 1, sep ='_')) %>% 
+  mutate(bind_g = word(bind, start = 1, end = 1, sep = '_')) %>% 
   left_join(species_in_tree_tibble, by = c('bind_g' = 'genus')) %>% 
     filter(!is.na(reference)) %>% 
   mutate(poly = FALSE)
 ```
 
 ```{r}
-genera_in_tree <- species_in_tree %>% word(1, 1, sep ='_') %>% unique()
+genera_in_tree <- species_in_tree %>% word(1, 1, sep = '_') %>% unique()
 dato <- dato %>% filter(bind_g %in% genera_in_tree)
 ```
 
 If we have genera in the dato frame that are not in the tree we're binding to (like *Homo*), then tree.merger() will stop asking us to provide a source tree where that genus should be placed.
 
-We don't have that source tree, so let's remove species we want to add that do not have their genus in the 
-species tree. Hopefully as we add more trees we'll be able to place those species.
+We don't have that source tree, so let's remove species we want to add that do not have their genus in the species tree. Hopefully as we add more trees we'll be able to place those species.
 
 The following runs for ~5 minutes:
 
-
 ```{r}
-
 # the y-cauda species and y-lineata break everything
 big_tree <- ape::drop.tip(big_tree, 'Quietula_y-cauda')
 big_tree <- ape::drop.tip(big_tree, 'Starksia_y-lineata')
@@ -186,107 +194,149 @@ dato <- dato |> filter(bind != 'Starksia_y-lineata') |>
   filter(reference != 'Quietula_y-cauda')
 
 if (!file.exists('big_tree.withGeneraAdded.tre')){
-  big_tree_merged <- RRphylo::tree.merger(backbone=big_tree, data=as.data.frame(dato %>% select(-bind_g)),plot=FALSE)
+  big_tree_merged <- RRphylo::tree.merger(backbone=big_tree, data=as.data.frame(dato %>% select(-bind_g)), plot=FALSE)
 }
 ```
 
 ```{r}
-ape::write.tree(phy = big_tree_merged, 'big_tree.withGeneraAdded.tre')
+if (!file.exists('big_tree.withGeneraAdded.tre')){
+  ape::write.tree(phy = big_tree_merged, 'big_tree.withGeneraAdded.tre')
+}
+big_tree_merged <- read.tree('big_tree.withGeneraAdded.tre')
 ```
 
+## Adding species using genus-first hierarchical approach
 
+We have about 3600 species where those genera are not in the tree. Instead of placing at family MRCA (which can be too high), we'll use a hierarchical approach:
+1. First try to place at genus MRCA (most specific)
+2. If only one congener, place directly at that species
+3. Only fall back to family MRCA if no congeners exist
 
-
-
-## Adding species for which the genera are not in the tree
-
-We have about 3600 species where those genera are not in the tree. What we'll do instead
-is chuck the species at the root of the family.
-
-So what we have to do:
-- get the species that are not in the big tree now, get their genera
-- for each genus, get the family from AFD
-- calculate the MRCA for all family members that are in the tree
-- insert the genus/species at the root of the MRCA
-
-
-so like this, calculating MRCA of species A and B and inserting there:
-
-```
-
-    --- A
-    |
-----|
-    |
-    --- B
-
-```
-
-becomes
-
-```
-     --- A
-     |
-|----|
-|    |
-|    --- B
-|
-|------- Added species
-
-```
-
-We will remove branch lengths for this.
+This is much faster and produces better placements!
 
 ```{r}
-
 still_missing <- setdiff(marine_species, big_tree_merged$tip.label)
 super_merged3 <- big_tree_merged
-super_merged3$edge.length <- NULL # go away branch length
-counter <- 1
+super_merged3$edge.length <- NULL # remove branch lengths for simpler topology
+
 addeds <- c()
-for(spec in still_missing ){
+placement_stats <- tibble(
+  species = character(),
+  placement_level = character(),
+  n_relatives = integer()
+)
+
+for(spec in still_missing) {
   
-  # get all other members in this family
+  # Get lineage info
   lineage <- a %>% filter(species == gsub('_', ' ', spec))
-  stopifnot(nrow(lineage) > 0)
-  this_fam <- lineage$family
+  if(nrow(lineage) == 0) next
   
-  all_other_spec_in_family <- a %>% filter(family == this_fam) %>% pull(species) %>% 
+  this_genus <- lineage$genus
+  this_family <- lineage$family
+  
+  # STEP 1: Try to find congeners (same genus)
+  congeners <- a %>% 
+    filter(genus == this_genus) %>% 
+    pull(species) %>% 
     str_replace_all(' ', '_')
-  all_other_spec_in_family_in_tree <- intersect(super_merged3$tip.label, all_other_spec_in_family)
-  # get the MRCA of all other members
-  mrca_spot <- getMRCA(super_merged3, all_other_spec_in_family_in_tree)
+  congeners_in_tree <- intersect(super_merged3$tip.label, congeners)
   
-  # now bind this species to the MRCA
+  mrca_spot <- NULL
+  placement_level <- NA
+  n_relatives <- 0
   
-  addeds <- c(addeds, spec)
-  super_merged3 <- bind.tip(super_merged3, tip.label= spec,
-      where=mrca_spot)#, position=max(super_merged$edge.length))
-  #super_merged3$edge.length <- c(super_merged$edge.length, max(super_merged$edge.length, na.rm=TRUE))
-  counter <- counter + 1
-  #if(counter == 5){
-  #  break
-  #}
+  if(length(congeners_in_tree) >= 2) {
+    # Multiple congeners - use their MRCA
+    mrca_spot <- getMRCA(super_merged3, congeners_in_tree)
+    placement_level <- "genus_mrca"
+    n_relatives <- length(congeners_in_tree)
+    
+  } else if(length(congeners_in_tree) == 1) {
+    # Single congener - bind directly to it
+    mrca_spot <- which(super_merged3$tip.label == congeners_in_tree[1])
+    placement_level <- "single_congener"
+    n_relatives <- 1
+    
+  } else {
+    # STEP 2: No congeners - fall back to family
+    family_members <- a %>% 
+      filter(family == this_family) %>% 
+      pull(species) %>% 
+      str_replace_all(' ', '_')
+    family_members_in_tree <- intersect(super_merged3$tip.label, family_members)
+    
+    if(length(family_members_in_tree) >= 2) {
+      mrca_spot <- getMRCA(super_merged3, family_members_in_tree)
+      placement_level <- "family_mrca"
+      n_relatives <- length(family_members_in_tree)
+      
+    } else if(length(family_members_in_tree) == 1) {
+      mrca_spot <- which(super_merged3$tip.label == family_members_in_tree[1])
+      placement_level <- "single_family_member"
+      n_relatives <- 1
+    }
+  }
+  
+  # Bind the species if we found a valid spot
+  if(!is.null(mrca_spot) && length(mrca_spot) > 0) {
+    addeds <- c(addeds, spec)
+    super_merged3 <- bind.tip(super_merged3, 
+                               tip.label = spec,
+                               where = mrca_spot)
+    
+    # Track placement statistics
+    placement_stats <- placement_stats %>% 
+      add_row(species = spec, 
+              placement_level = placement_level,
+              n_relatives = n_relatives)
+  }
+  
+  # Progress indicator
+  if(length(addeds) %% 100 == 0) {
+    print(paste0("Added ", length(addeds), " species"))
+  }
 }
 
-test_colors <- tibble(label = addeds, source = 'Added into family')
+print(paste0("Total species added: ", length(addeds)))
+```
 
-p <- ggtree(super_merged3, branch.length = 'none') %<+% test_colors + geom_tippoint(size=1, aes(color = source)) + scale_color_discrete(na.value='transparent')
-ggsave('tree_with_families_added.png', p)
+```{r}
+# Summarize placement statistics
+placement_summary <- placement_stats %>% 
+  group_by(placement_level) %>% 
+  summarise(
+    count = n(),
+    mean_relatives = mean(n_relatives),
+    median_relatives = median(n_relatives)
+  ) %>% 
+  arrange(desc(count))
+
+print("Placement summary:")
+print(placement_summary)
+```
+
+```{r}
+# Visualize placements colored by method
+test_colors <- placement_stats %>% 
+  select(label = species, source = placement_level)
+
+p <- ggtree(super_merged3, branch.length = 'none') %<+% test_colors + 
+  geom_tippoint(size=1, aes(color = source)) + 
+  scale_color_discrete(na.value='transparent') +
+  labs(color = "Placement method")
+ggsave('tree_with_families_added_hierarchical.png', p, width = 12, height = 20)
 p
 ```
 
-You can see some at the bottom that are just... bad? Those have been placed at the root of the tree.
-
-
 ```{r}
-write.tree(super_merged3, file = 'big_tree.withGeneraAdded.andFamilies.tre')
+write.tree(super_merged3, file = 'big_tree.withGeneraAdded.andFamilies.hierarchical.tre')
 ```
 
-Let's plot the final tree
+Let's plot the final tree with all sources colored
 
 ```{r}
-colors <- tibble(label = addeds, source = 'Added later') %>% 
+colors <- tibble(label = addeds, source = 'Added later (hierarchical)') %>% 
   rbind(tibble(label = setdiff(bonys$tip.label, bonys2$tip.label), source = 'actinops1')) %>% 
   rbind(tibble(label = setdiff(bonys2$tip.label, bonys$tip.label), source = 'actinops2')) %>%
   rbind(tibble(label = intersect(bonys$tip.label, bonys2$tip.label), source = 'actinops1+2')) %>%
@@ -297,8 +347,9 @@ colors <- tibble(label = addeds, source = 'Added later') %>%
 ```
 
 ```{r}
-p <- ggtree(super_merged3, branch.length = 'none') %<+% colors + geom_tippoint(size=1, aes(color = source)) + scale_color_discrete(na.value='transparent')
-ggsave('tree_with_families_added.all_sources.png', p)
+p <- ggtree(super_merged3, branch.length = 'none') %<+% colors + 
+  geom_tippoint(size=1, aes(color = source)) + 
+  scale_color_discrete(na.value='transparent')
+ggsave('tree_with_families_added.all_sources.hierarchical.png', p, width = 12, height = 20)
 p
 ```
-
